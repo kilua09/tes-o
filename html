@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anime Store</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s, background-image 0.5s ease-in-out;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    body.dark {
+      background-color: #121212 !important;
+      color: #f4f4f4;
+      background-image: none !important;
+    }
+    header {
+      background-color: #ff4757;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    .toggle-dark {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #2f3542;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #wallpaper-settings {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 15px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      text-align: center;
+      user-select: none;
+    }
+    #wallpaper-settings.dark {
+      background: rgba(18, 18, 18, 0.85);
+      color: #f4f4f4;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    }
+    #wallpaper-settings button {
+      cursor: pointer;
+      margin: 5px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: none;
+      background-color: #ff4757;
+      color: white;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    #wallpaper-settings button:hover {
+      background-color: #e84347;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+    .product {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 220px;
+      margin: 10px;
+      padding: 10px;
+      text-align: center;
+      transition: background-color 0.3s;
+      cursor: pointer;
+    }
+    body.dark .product {
+      background-color: #1e1e1e;
+      border-color: #333;
+    }
+    .product img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+    .product h3 {
+      margin: 10px 0 5px;
+    }
+    .product p {
+      margin: 5px 0;
+    }
+    .buy-button {
+      background-color: #1e90ff;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .buy-button:hover {
+      background-color: #0066cc;
+    }
+    #cart {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e90ff;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    #searchBar {
+      width: 300px;
+      padding: 10px;
+      margin: 20px auto;
+      display: block;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .like-button {
+      background-color: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    .liked {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Anime Store</h1>
+    <p>Compre seus produtos de anime favoritos!</p>
+    <button class="toggle-dark" onclick="toggleDarkMode()">🌙 Modo Escuro</button>
+  </header>
+
+  <div id="wallpaper-settings">
+    <h3>Escolha o Papel de Parede:</h3>
+    <button onclick="changeWallpaper('default')">Padrão</button>
+    <button onclick="changeWallpaper('space')">Espaço</button>
+    <button onclick="changeWallpaper('nature')">Natureza</button>
+    <button onclick="changeWallpaper('anime')">Anime</button>
+  </div>
+
+  <input type="text" id="searchBar" placeholder="Pesquisar produtos..." oninput="filterProducts()" />
+
+  <div class="container" id="product-list"></div>
+
+  <div id="cart" onclick="viewCart()">🛒 Carrinho (0)</div>
+
+  <script>
+    const products = [
+  
+  { name: "moleton do inosuke", price: 59.9, img: "https://down-br.img.susercontent.com/file/br-11134207-7qukw-lfr40j1cexkv73", size: "M, G, GG", color: "Azul" },
+  
+  { name: "chapéu do luffy", price: 19.9, img: "https://i.pinimg.com/736x/75/49/ee/7549ee9bf64eab5d82869d71439c53c3.jpg", size: "M, G, GG", color: "Laranja" },
+  
+  { name: "adesivo de black clover", price: 29.9, img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTXq0ISBVSnltw-e32pyJhotadDRr_LOFr2nhHxaTJ_df14TzWH_n5Bghe07GxnkmlKMYCh2KzNCxHIDvmUIkUjoo63VTP2L-LVdxu_tklST_CUMc3eb2Q89g", size: "", color: "" },
+  
+  { name: "moleton da Mitsuri", price: 139.9, img: "https://ae01.alicdn.com/kf/S0abcf9ec84a94685940ecd8e53611733M.jpg", size: "M, G, GG", color: "Branco" },
+ 
+  { name: "Caneca do gojo", price: 29.9, img: "https://down-br.img.susercontent.com/file/b3b37ca36de50b7ec8ef3f04eadfaa2d", size: "100mL, 150mL, 500mL", color: "" },
+ 
+  { name: "moletom de solo leveling", price: 159.9, img: "https://img.joomcdn.net/e51366606197224bdba2a9decd6413abc54e724c_original.jpeg", size: "M, G, GG", color: "Preto" },
+  
+  { name: "mochila de jujutsu kaisen", price: 59.9, img: "https://down-br.img.susercontent.com/file/sg-11134201-7rfia-m463el5rxpxf7b", size: "40L", color: "Preto, Ciano" },
+ 
+  { name: "caneca do rengoku", price: 39.9, img: "https://down-br.img.susercontent.com/file/242ef234de33b9efb18d9aaf25a7e140", size: "100mL, 150mL, 500mL", color: "Preto,Vermelho" },
+  
+  { name: "brincos de demon slayer", price: 60.9, img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSVff2aFELfSuGlQ-w1clpcDH7dlg7tWbADA6RV89TN7sCcAymG0XpUf7ug0iTOgvznDfwTJ746zauuTb1xEodkCXOQLAfn4rI56IXziuL52bovUqRavXOc1C9qczPNTGfaHEGLBw&usqp=CAc", size: "", color: "" },
+  
+  { name: "adesivo de jujutsu", price: 59.9, img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTOjWy0bADJz3UBnlMZ8Szre5FqeL-pnSkX2I0baJLxbs8Xc7_1T1igVWRWMlaNhOXC4qn19Qu-t7-pM4vamoI2RT_eQ8B8-53pwUOcIOhCNDQbqfLlF_sd", size: "", color: "" },
+    
+  { name: "adeseivo de naruto", price: 49.9, img: "https://m.media-amazon.com/images/I/81eFvTOccvL.jpg", size: "", color: "" },
+ 
+  { name: "caneca da nezuko", price: 59.9, img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQaVI9YcIsGOI8ICiNYDQbYTnA67otbJ7s-4WTXVFWEy1p618VTTl9evjolmU2Xd0zSb2q__ImG-oS5L2YL-MOG-KIG9xtV-1xoOqjP_T-4XrVQutvO6Hbg0g", size: "100mL, 150mL, 500mL", color: "Rosa, branco" },
+
+  { name: "Kit escola do sasuke", price: 79.9, img: "https://static.zattini.com.br/produtos/kit-mochila-lancheira-estojo-anime-sasuke/06/4PU-0042-006/4PU-0042-006_zoom1.jpg?ts=1663869624", size: "M, G, GG", color: "" },
+
+  { name: "marcado de pagina", price: 29.9, img: "https://down-br.img.susercontent.com/file/br-11134207-7qukw-lgb5sd950e7y6e", size: "M, G,", color: "" },
+
+  { name: "coberto do obanai", price: 99.9, img: "https://ih1.redbubble.net/image.5716377051.3437/ur,blanket_large_bed,square,x600.1.jpg", size: "M, G, GG", color: "Preto" },
+
+  { name: "boneco do luffy", price: 79.9, img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcThwPWqLCTgxAHSTFt4Vqj79N3ZoOU1-Qerl8TdyZVw8Q-ZhTl9b18hEOTwrcxrXDYqqpMinzEGBIdDbbdUPk09P3c4lpXjj4se7vNL8ILLWqXWe-tcVXefaA", size: "M, G, GG", color: "" },
+
+  { name: "almofada do tokito", price: 59.9, img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcS3VvgTL97N0twy8EHckUzFj5UetCIBWACaTs3g_kV1OlHjcgf0UXLSborWv63S7CFd8pgL6L53HLijsDvghG5n3oimMIfuwjMOeHMLMyfmVyU4xT8tqvmH", size: "M, G, GG", color: "Branco e ciano" },
+
+  { name: "almofada do escanor", price: 59.9, img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRHPeCYglrJctuONqRyj-r7e4DKxYOmUsP-_Xh61lqntu9E-t22943nhqOG2WkGwHgwrICqWwakLgiUFkdjBBYIsH5o6j7aE6-JVJObXLW5YC3JQOtb__5W", size: "M, G, GG", color: "" },
+
+  { name: "almofada da nezuko", price: 59.9, img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS-7m1CncoBxfPbSJEZLrdBYHxiGxaJLRhVbVAUasi7W-vYA0q0x9XPPPTmLuxtU22yt6IJjCTPizUFGh-rxGpSbIFRNLwZh7SJ2f68SOxPkIprImgIi_WRog", size: "M, G, GG", color: "" },
+
+  { name: "almofada do itachi", price: 59.9, img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQ2dukplVfAL_nDf0jEkNO5ZppvkG9sqnUJTb62TaIxoNcm9wI6foRRDw_NWwHRES007cwZB23DZknDJOesmaiPrEuNIGkMFVIBTEzLOlPRga3ZUDSdBquSswE", size: "M, G, GG", color: "" },
+ 
+  { name: "camisa do killua", price: 49.9, img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSI5e_NvOjRnRxFdVqwNIemMNxpYyHTjD1zUhd6TMrm2UuEbw2hRxoTfZLejkZ5OxJYuMtbLVBYcd3XCRDMjGIifc8iBL2aVY7p5TJDu_Kxh0PgaIiF6uxq", size: "M, G, GG", color: "Azul" },
+  
+  { name: "camisa do satoru gojo", price: 49.9, img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTWa925KBhwTICv-F6IOcZ-zs3yeJrk90IJJD46bapxCDu1r6dwCON5vnUUjCfQl7z8KAhmmwAcmESFllLPHtX9vhiKPnKzSoJeNhJTLbvqR1PQp4BBWFyDZ44", size: "M, G, GG", color: "Preto" },
+
+  { name: "camisa do toji", price: 49.9, img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQJ2G3XMcFSlZhihaT2gZDmoi3Yi9_fs2733orPM55-H-864jDmiV_GD1hsOducIiLP76kHiglni1MrECjaIeTzixMxYXbMBdkr9_M2Qi_CHdsavfmo8JIbaw", size: "M, G, GG", color: "branca" },
+
+  { name: "camisa do sukuna", price: 59.9, img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSSMnoCpmwcL1sqKIIwgLQViZ5C_3tjpT22uHnJJ0n9fHN4HCAj32Ilbf8NYS2oOez2Ph1f0_QAJRz25nWhkVAivJ6Ie-3qPdz6Jr9_hgKPbx7h9xtaCSAm", size: "M, G, GG", color: "branco" },
+  
+  { name: "manga de meu casamento feliz", price: 129.9, img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQIT9jkqjTUK8WVh51Oi3vdDfV_FFvAR31X3-0jxp_CgUHJ9U6DRt-G3S8cPH7S_EeTIjnXsSvRQ0zzmlhAYKxT8ZVtLoQ8UnJc3RzZDZub", size: "", color: "" },
+
+  { name: "manga de Hori-san to Miyamura-kun", price: 139.9, img: "https://m.media-amazon.com/images/I/61JoU+iumRL._AC_UF1000,1000_QL80_.jpg", size: "", color: "L" },
+
+  { name: "manga de namorada de aluguel ", price: 159.9, img: "https://m.media-amazon.com/images/I/618VO-1owZS._AC_UF1000,1000_QL80_.jpg", size: "", color: "" },
+
+  { name: "manga de “Clannad” de Key e Jun Maeda ", price: 99.9, img: "https://m.media-amazon.com/images/I/51sL6mqlmYL._AC_UF1000,1000_QL80_.jpg", size: "M, G, GG", color: "Laranja" },
+ 
+  { name: "colar do uzui", price: 39.9, img: "https://down-br.img.susercontent.com/file/6fe3663e12981b87f09f6549cec88e43", size: "M, G, GG", color: "Laranja" },
+   
+  { name: "colar do tomioca", price: 39.9, img: "https://down-br.img.susercontent.com/file/31e6d3d48979aaef6ec36ebe0d333bd9", size: "M, G, GG", color: "Laranja" },
+   
+  { name: "colar do rengoku", price: 39.9, img: "https://down-br.img.susercontent.com/file/0e6efda7a455b8894633c84de8e39467", size: "M, G, GG", color: "Laranja" },
+   
+  { name: "colar da shinobu", price: 59.9, img: "https://down-br.img.susercontent.com/file/f192acbc8bdc31678162c94efb0a7b07", size: "M, G, GG", color: "Laranja" },
+  
+  
+  { name: "boneco do senku", price: 59.9, img: "https://m.media-amazon.com/images/I/61km16hdeCL.jpg", size: "M, G, GG", color: "Laranja" },
+
+  { name: "boneco do dio brando", price: 59.9, img: "https://exfigure.com/cdn/shop/files/JoJo_sBizarreAdventure-StardustCrusaders-DioBrando-SuperActionStatue_11_MedicosEntertainment.png?v=1738056855&width=1080", size: "M, G, GG", color: "Laranja" },
+ 
+    { name: "boneco do senku", price: 59.9, img: "https://down-br.img.susercontent.com/file/br-11134207-7r98o-lunnwmwwpbadd4", size: "M, G, GG", color: "Laranja" },
+  { name: "boneco do ", price: 59.9, img: "https://sc04.alicdn.com/kf/Hd4bc6311f4b24bcdb8f9dbecce0f80330.jpg", size: "M, G, GG", color: "Laranja" },
+
+  
+  { name: "moleton do kokushibo", price: 59.9, img: "https://m.media-amazon.com/images/I/51MrpNGppuL._AC_SY1000_.jpg", size: "M, G, GG", color: "Laranja" },
+  
+  { name: "Moleton do Goku", price: 129.9, img: "https://http2.mlstatic.com/D_NQ_NP_975347-MLB53156514349_012023-O-blusa-de-frio-moletom-unissex-dragon-ball-goku-full-promoco.webp", size: "M, G, GG", color: "Preto com Vermelho" },
+
+  { name: "caderno de Attack On Titan", price: 59.9, img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTkeuNxJo4HLsmVMN7fpdr-zPzvv6AwGO1N4-5UTyPtgygzG8Xoh1i17TA9c8hM-NaFTAt7HWu35petq0ifg2b09Kwual_SK4Wlh6lO72aZbuT3t8Et8-Zz", size: "M, G, GG", color: "Laranja" },
+
+  { name: "caderno de anime personalizado", price: 59.9, img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQXVoNe9aS5rtzuzYJgbGA3vJTWBOzehGGcYxJocn4jhiGRZdnTCPbbS8VXGN_F1G2hBspHYwRROjY7aIJPOaEr9YpdQXmFRVvDE_hB1-CFntCcKHOU3FgvcQ", size: "M, G, GG", color: "Laranja" },
+
+  { name: "mochila do aizen", price: 59.9, img: "https://http2.mlstatic.com/D_981933-MLB84604080645_052025-O.jpg", size: "M, G, GG", color: "Laranja" }
+
+
+   
+ ];
+
+    const wallpapers = {
+      default: "",
+      space: "url('https://services.meteored.com/img/article/alem-da-via-lactea-milhares-de-galaxias-sao-atraidas-para-o-mesmo-lugar-atraves-de-um-grande-atrator-1685141543945_1280.jpg')",
+      nature: "url('https://wallpapers.com/images/hd/4k-nature-iphone-4k0hwr6cmcxgglft.jpg')",
+      anime: "url('https://wallpapers.com/images/featured/computador-akatsuki-o1mrm47qng4rwgjd.jpg')"
+    };
+
+    let currentWallpaper = "default";
+    let darkMode = false;
+    const container = document.getElementById("product-list");
+    const cartButton = document.getElementById("cart");
+    let cart = [];
+    let likes = new Set();
+
+    function renderProducts(filter = "") {
+      container.innerHTML = "";
+      products.forEach((product, index) => {
+        if (
+          product.name.toLowerCase().includes(filter.toLowerCase()) ||
+          (product.color && product.color.toLowerCase().includes(filter.toLowerCase()))
+        ) {
+          const div = document.createElement("div");
+          div.className = "product";
+          div.innerHTML = `
+            <img src="${product.img}" alt="${product.name}" />
+            <h3>${product.name}</h3>
+            <p>R$ ${product.price.toFixed(2)}</p>
+            <p><strong>Tamanhos:</strong> ${product.size}</p>
+            <p><strong>Cor:</strong> ${product.color || "Indefinida"}</p>
+            <button class="buy-button" onclick="addToCart(${index}, event)">Comprar</button>
+            <button class="like-button ${likes.has(index) ? 'liked' : ''}" onclick="toggleLike(${index}, event)">&#10084;</button>
+          `;
+          div.addEventListener("click", (e) => {
+            if (!["BUTTON", "IMG", "P", "H3"].includes(e.target.tagName)) return;
+            showDetails(index);
+          });
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function addToCart(index, event) {
+      event.stopPropagation();
+      cart.push(products[index]);
+      updateCartDisplay();
+      alert(`Adicionado ao carrinho: ${products[index].name}`);
+    }
+
+    function toggleLike(index, event) {
+      event.stopPropagation();
+      if (likes.has(index)) likes.delete(index);
+      else likes.add(index);
+      renderProducts(document.getElementById("searchBar").value);
+    }
+
+    function updateCartDisplay() {
+      cartButton.innerHTML = `🛒 Carrinho (${cart.length})`;
+    }
+
+    function viewCart() {
+      if (cart.length === 0) {
+        alert("Seu carrinho está vazio!");
+        return;
+      }
+
+      let summary = "Itens no carrinho:\n\n";
+      let total = 0;
+      cart.forEach((item, i) => {
+        summary += `${i + 1}. ${item.name} | R$ ${item.price.toFixed(2)}\n`;
+        total += item.price;
+      });
+
+      summary += `\nTotal: R$ ${total.toFixed(2)}\n\nDigite o número do item que deseja remover ou cancele.`;
+
+      const input = prompt(summary);
+      if (input === null) return;
+
+      const index = parseInt(input) - 1;
+      if (isNaN(index) || index < 0 || index >= cart.length) {
+        alert("Número inválido.");
+        return;
+      }
+
+      removeFromCart(index);
+    }
+
+    function removeFromCart(index) {
+      const removed = cart.splice(index, 1);
+      updateCartDisplay();
+      alert(`Removido do carrinho: ${removed[0].name}`);
+    }
+
+    function filterProducts() {
+      const filter = document.getElementById("searchBar").value;
+      renderProducts(filter);
+    }
+
+    function toggleDarkMode() {
+      darkMode = !darkMode;
+      document.body.classList.toggle("dark");
+      document.getElementById("wallpaper-settings").classList.toggle("dark");
+      if (darkMode) document.body.style.backgroundImage = "none";
+      else changeWallpaper(currentWallpaper);
+    }
+
+    function changeWallpaper(type) {
+      currentWallpaper = type;
+      if (!darkMode) document.body.style.backgroundImage = wallpapers[type];
+    }
+
+    function showDetails(index) {
+      const product = products[index];
+      alert(`Nome: ${product.name}\nPreço: R$ ${product.price.toFixed(2)}\nTamanhos: ${product.size}\nCor: ${product.color || "Indefinida"}`);
+    }
+
+    // Inicializa
+    renderProducts();
+  </script>
+</body>
+</html>
